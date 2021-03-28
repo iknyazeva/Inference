@@ -1,4 +1,6 @@
 # Functions for data simulation
+import random
+from sklearn.utils import resample
 import numpy as np
 
 
@@ -15,6 +17,14 @@ def get_permutation_sample(data1, data2):
 
    """
 
+    data = np.concatenate((data1, data2))
+
+    pdata = np.random.permutation(data)
+    pdata1 = pdata[:len(data1)]
+    pdata2 = pdata[len(data1):]
+    return  pdata1,  pdata2
+
+
     pass
 
 
@@ -29,6 +39,13 @@ def get_bootstrap_sample(sample):
 
   """
 
+
+    data = sample
+    boot = resample(data, replace=True, n_samples=4, random_state=1)
+    print('Bootstrap Sample: %s' % boot)
+    bsample = [x for x in data if x not in boot]
+    print('OOB Sample: %s' % bsample)
+    return bsample
     pass
 
 
@@ -43,4 +60,10 @@ def compute_statistics(random_sample, stat=np.mean, **kwargs):
    Returns:
       test_statistics (float)
    """
+   if stat == np.percentile:
+    return np.percentile(random_sample, 2.5, 97.5)
+
+   else:
+     return stat(random_sample)
    pass
+
