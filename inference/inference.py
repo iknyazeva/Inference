@@ -1,3 +1,7 @@
+import pandas as pd
+import numpy as np
+
+
 class Infer(object):
     """
     class for inference with methods for independence test and points estimates (for now)
@@ -16,6 +20,7 @@ class Infer(object):
         self.theor = None
         self.nsamples = nsamples
 
+
     @classmethod
     def from_two_arrays(cls, group1, group2, t_type='independent'):
         """ Create dataframe from two
@@ -28,6 +33,11 @@ class Infer(object):
         Returns:
             dataframe: with columns: value, group_id
         """
+        data = np.concatenate([group1.values, group2.values])
+        groups = (group1, group2)
+        df = pd.DataFrame(dict(value=data, group=groups))
+        df['group_id'] = pd.Categorical(df['group']).codes
+        return df
         pass
 
     @classmethod
@@ -48,6 +58,7 @@ class Infer(object):
 
 
         """
+
         pass
 
     def test_independence(self, column_name, test_stat, theor=False, direction='both', **kwargs):
@@ -70,6 +81,9 @@ class Infer(object):
         self.test_type = 'independence'
         self.direction = direction
         self.theor = theor
+
+
+
         pass
 
     def point_estimates(self, test_stat, theor = False, direction='both', **kwargs):
