@@ -1,5 +1,6 @@
 # Functions for data simulation
 import numpy as np
+import random
 
 
 def get_permutation_sample(data1, data2):
@@ -14,8 +15,12 @@ def get_permutation_sample(data1, data2):
       pdata2 (1d numpy array or list)
 
    """
+    data = np.concatenate((data1, data2))
+    pdata = np.random.permutation(data)
+    pdata1 = pdata[:len(data1)]
+    pdata2 = pdata[len(data1):]
 
-    pass
+    return pdata1, pdata2
 
 
 def get_bootstrap_sample(sample):
@@ -28,19 +33,23 @@ def get_bootstrap_sample(sample):
       bsample (nd numpy array or list):
 
   """
-
-    pass
+    bsample = random.sample(sample.tolist(), 4)
+    return bsample
 
 
 def compute_statistics(random_sample, stat=np.mean, **kwargs):
-   """ Compute statistic by random sample
+    """ Compute statistic by random sample
 
-   Args:
-      random_sample (ndarray or list of floats): sample from probability distribution or data real data sample
-      stat (func): statistics, could be np.mean, np.median, np.std, np.percentile
-      **kwargs : low and upper bound for percentile
+    Args:
+    random_sample (ndarray or list of floats): sample from probability distribution or data real data sample
+    stat (func): statistics, could be np.mean, np.median, np.std, np.percentile
+    **kwargs : low and upper bound for percentile
 
-   Returns:
-      test_statistics (float)
-   """
-   pass
+    Returns:
+    test_statistics (float)
+    """
+    if stat is np.percentile:
+        test_statistics = stat(random_sample, kwargs)
+    else:
+        test_statistics = stat(random_sample)
+    return test_statistics

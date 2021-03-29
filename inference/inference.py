@@ -1,3 +1,8 @@
+import numpy as np
+import pandas as pd
+import pingouin as pg
+
+
 class Infer(object):
     """
     class for inference with methods for independence test and points estimates (for now)
@@ -17,6 +22,7 @@ class Infer(object):
         self.nsamples = nsamples
 
     @classmethod
+    # зачем t_type
     def from_two_arrays(cls, group1, group2, t_type='independent'):
         """ Create dataframe from two
 
@@ -28,14 +34,19 @@ class Infer(object):
         Returns:
             dataframe: with columns: value, group_id
         """
-        pass
+        df0 = pd.DataFrame()
+        df1 = pd.DataFrame()
+        df0['values'] = group1
+        df0['group_id'] = 0
+        df1['values'] = group2
+        df1['group_id'] = 1
+        dataframe = df0.append(df1)
+        return dataframe
 
     @classmethod
+    # не понятно, что есть что
     def from_two_proportions(cls, prop_1, prop_2, len_data1, len_data2):
         """  (Fill based on example with restaurants)
-        Returns:
-
-
 
         Args:
             prop_1:
@@ -46,8 +57,11 @@ class Infer(object):
         Returns:
                 dataframe: with columns: value, group_id
 
-
         """
+        # overall = np.array(75 * [1] + 25 * [0])
+        # restrt = np.array(67 * [1] + 33 * [0])
+        df0 = pd.DataFrame()
+        df1 = pd.DataFrame()
         pass
 
     def test_independence(self, column_name, test_stat, theor=False, direction='both', **kwargs):
@@ -70,7 +84,32 @@ class Infer(object):
         self.test_type = 'independence'
         self.direction = direction
         self.theor = theor
-        pass
+
+        def permutation_sample(data1, data2):
+            data = np.concatenate((data1, data2))
+            permuted_data = np.random.permutation(data)
+            return permuted_data[:len(data1)], permuted_data[len(data1):]
+
+        data1 = self.data[self.data['male'] == 0][column_name]
+        data2 = self.data[self.data['male'] == 1][column_name]
+
+        p1, p2 = permutation_sample(data1, data2)
+
+        # empirical test statitistics
+        t_diff = test_stat(data2) - test_stat(data1)
+
+        # test_stat sample
+        sample_test = []
+
+        # simulation based p_val
+        diffs = np.squeeze(np.diff([list(map(test_stat, p1, p2)) for i in range(self.nsamples)]))
+        p_val = test_stat(diffs > t_diff)
+
+        if self.theor:
+            ttest = pg.ttest(x=data1, y=data2).round(2)
+            return t_diff, sample_test, p_val, ttest
+        else:
+            return t_diff, sample_test, p_val
 
     def point_estimates(self, test_stat, theor = False, direction='both', **kwargs):
         pass
@@ -83,3 +122,5 @@ class Infer(object):
             conclusion
         """
         pass
+
+
